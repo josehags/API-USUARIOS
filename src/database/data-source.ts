@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { Usuario } from '../models/Usuario';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 
@@ -14,6 +15,6 @@ export const APPDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [Usuario],
-  migrations: [],
+  //migrations: [],
   subscribers: [],
 });

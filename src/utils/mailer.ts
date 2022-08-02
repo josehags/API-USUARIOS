@@ -1,4 +1,5 @@
-import nodemailer from 'nodemailer';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const nodemailer = require('nodemailer');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 

@@ -1,6 +1,6 @@
 import jwt = require('jsonwebtoken');
 
-export function verifyJWT(request, response, NextFunction) {
+function verifyJWT(request, response, NextFunction) {
   const token = request.headers['x-access-token'];
 
   if (!token) {
@@ -21,4 +21,4 @@ export function verifyJWT(request, response, NextFunction) {
   });
 }
 
-module.exports = { verifyJWT };
+export { verifyJWT };

@@ -1,14 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import { Usuario } from '../models/Usuario';
-
+import { APPDataSource } from '../database/data-source';
 import * as yup from 'yup';
 
-import crypto from 'crypto';
-import bcrypt from 'bcrypt';
+import crypto = require('crypto');
+import bcrypt = require('bcrypt');
 import jwt = require('jsonwebtoken');
 import hash = require('../utils/hashPass');
 import mailer = require('../utils/mailer');
-import { APPDataSource } from '../database/datesource';
 
 class UsuarioController {
   async create(request: Request, response: Response, next: NextFunction) {

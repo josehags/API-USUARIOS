@@ -1,12 +1,11 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Request, Response, Router } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { pagination } from 'typeorm-pagination';
-import { AppError } from './errors/AppError';
+import { AppError } from './errors/AppErros';
 import { router } from './routes/routes';
 
 const app = express();
-
 /*app.use((req, res, next) => {
   //Qual site tem permissão de realizar a conexão, no exemplo abaixo está o "*" indicando que qualquer site pode fazer a conexão
     res.header("Access-Control-Allow-Origin", "*");
@@ -15,7 +14,6 @@ const app = express();
     app.use(cors());
     next();
 });*/
-
 app.use(cors());
 app.use(bodyParser.json());
 app.use(pagination);
