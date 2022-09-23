@@ -8,6 +8,7 @@ import bcrypt = require('bcrypt');
 import jwt = require('jsonwebtoken');
 import hash = require('../utils/hashPass');
 import mailer = require('../utils/mailer');
+import CreateSessionsService from '../middlewares/CreateSessions';
 
 class UsuarioController {
   async create(request: Request, response: Response, next: NextFunction) {
@@ -288,6 +289,28 @@ class UsuarioController {
         .json({ error: 'Não foi possivel alterar a senha!' });
     }
   }
+  public async findByEmail(email: string): Promise<Usuario | undefined> {
+    const usuario = APPDataSource.getRepository(Usuario).findOne({
+      where: { email },
+    });
+
+    return usuario;
+  }
 }
 
-export { UsuarioController };
+export default class SessionsController {
+  public async create(request: Request, response: Response): Promise<Response> {
+    const { email, password } = request.body;
+
+    const createSession = new CreateSessionsService();
+
+    const user = await createSession.execute({
+      email,
+      password,
+    });
+
+    return response.json(user);
+  }
+}
+
+export { UsuarioController, SessionsController };
