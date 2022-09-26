@@ -8,6 +8,7 @@ import bcrypt = require('bcrypt');
 import jwt = require('jsonwebtoken');
 import hash = require('../utils/hashPass');
 import mailer = require('../utils/mailer');
+import { Any } from 'typeorm';
 // import CreateSessionsService from '../middlewares/CreateSessions';
 
 class UsuarioController {
@@ -295,7 +296,8 @@ class UsuarioController {
     next: NextFunction,
   ) {
     const repository = APPDataSource.getRepository(Usuario);
-    const { email, password } = request.body;
+
+    const { email } = request.body;
 
     const user = await repository.findOne({ where: { email } });
 
@@ -305,15 +307,17 @@ class UsuarioController {
         .json({ error: 'usuário não existe / email incorreto' });
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (await bcrypt.compare(request.body.password, user.password)) {
+      //const { id } = user;
+      const token = jwt.sign({ id: user.id }, process.env.SECRET, {
+        expiresIn: '1d',
+      });
 
-    if (!isValidPassword) {
-      return response.status(401).json({ error: 'senha incorreta' });
+      const profile = { ...Usuario._doc };
+      delete profile.password;
+      return response.json({ auth: true, token, profile });
     }
-    const token = jwt.sign({ id: user.id }, process.env.SECRET, {
-      expiresIn: '1d',
-    });
-    return response.json({ user, token });
+    return response.status(401).json({ error: 'Senha incorreta.' });
   }
 }
 

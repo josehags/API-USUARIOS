@@ -42,6 +42,8 @@ export class Usuario {
 
   @UpdateDateColumn() // Para já capturar a data e fazer a formatação
   update_at: Date;
+  private _doc: any;
+  static _doc: any;
 
   /*
       A geração do uuID automático não será por meio do SGBD, e sim aqui pelo código
