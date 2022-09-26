@@ -1,12 +1,10 @@
 import { Router } from 'express';
-import SessionsController, {
-  UsuarioController,
-} from '../controllers/UsuarioController';
+import { UsuarioController } from '../controllers/UsuarioController';
 import { verifyJWT } from '../utils/functionsJWT';
 
 const router = Router();
 const usuarioController = new UsuarioController();
-const sessionsController = new SessionsController();
+// const sessionsController = new SessionsController();
 
 router.post('/signup', usuarioController.create);
 router.post('/login', usuarioController.login);
@@ -14,7 +12,7 @@ router.post('/recover-password', usuarioController.recoverPassword);
 
 // privada
 //criação de sessão com token
-router.post('/sessions', sessionsController.create);
+router.post('/sessions', usuarioController.authenticate);
 
 //criação de usuario
 router.get('/usuarios', verifyJWT, usuarioController.all);

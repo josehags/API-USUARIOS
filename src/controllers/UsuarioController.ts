@@ -8,7 +8,7 @@ import bcrypt = require('bcrypt');
 import jwt = require('jsonwebtoken');
 import hash = require('../utils/hashPass');
 import mailer = require('../utils/mailer');
-import CreateSessionsService from '../middlewares/CreateSessions';
+// import CreateSessionsService from '../middlewares/CreateSessions';
 
 class UsuarioController {
   async create(request: Request, response: Response, next: NextFunction) {
@@ -289,28 +289,32 @@ class UsuarioController {
         .json({ error: 'Não foi possivel alterar a senha!' });
     }
   }
-  public async findByEmail(email: string): Promise<Usuario | undefined> {
-    const usuario = APPDataSource.getRepository(Usuario).findOne({
-      where: { email },
-    });
-
-    return usuario;
-  }
-}
-
-export default class SessionsController {
-  public async create(request: Request, response: Response): Promise<Response> {
+  public async authenticate(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    const repository = APPDataSource.getRepository(Usuario);
     const { email, password } = request.body;
 
-    const createSession = new CreateSessionsService();
+    const user = await repository.findOne({ where: { email } });
 
-    const user = await createSession.execute({
-      email,
-      password,
+    if (!user) {
+      return response
+        .status(401)
+        .json({ error: 'usuário não existe / email incorreto' });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword) {
+      return response.status(401).json({ error: 'senha incorreta' });
+    }
+    const token = jwt.sign({ id: user.id }, process.env.SECRET, {
+      expiresIn: '1d',
     });
-
-    return response.json(user);
+    return response.json({ user, token });
   }
 }
 
-export { UsuarioController, SessionsController };
+export { UsuarioController };

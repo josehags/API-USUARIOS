@@ -1,5 +1,4 @@
 import jwt = require('jsonwebtoken');
-import auth from '../config/auth';
 
 function verifyJWT(request, response, NextFunction) {
   const token = request.headers['x-access-token'];
@@ -10,7 +9,7 @@ function verifyJWT(request, response, NextFunction) {
       .json({ auth: false, message: 'O token não foi fornecido!' });
   }
 
-  return jwt.verify(token, auth.jwt.secret, (err, decoded) => {
+  return jwt.verify(token, process.env.SECRET, (err, decoded) => {
     if (err) {
       return response
         .status(500)
