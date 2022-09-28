@@ -2,14 +2,12 @@ import { NextFunction, Request, Response } from 'express';
 import { Usuario } from '../models/Usuario';
 import { APPDataSource } from '../database/data-source';
 import * as yup from 'yup';
-
 import crypto = require('crypto');
 import bcrypt = require('bcrypt');
 import jwt = require('jsonwebtoken');
 import hash = require('../utils/hashPass');
 import mailer = require('../utils/mailer');
-import { Any } from 'typeorm';
-// import CreateSessionsService from '../middlewares/CreateSessions';
+import { CreateSessionsService } from './CreateSessions';
 
 class UsuarioController {
   async create(request: Request, response: Response, next: NextFunction) {
@@ -168,29 +166,30 @@ class UsuarioController {
     return response.json(usuariosRepository);
   }
 
-  async login(request: Request, response: Response, next: NextFunction) {
-    const usuariosRepository = APPDataSource.getRepository(Usuario);
+  // async login(request: Request, response: Response, next: NextFunction) {
+  //   const usuariosRepository = APPDataSource.getRepository(Usuario);
 
-    const usuario = await usuariosRepository.findOne({
-      where: { id: request.body.id },
-    });
+  //   const usuario = await usuariosRepository.findOne({
+  //     where: { email: request.body.email },
+  //   });
 
-    if (usuario == null) {
-      return response.json({ message: 'Este usuário não existe!' });
-    }
+  //   if (usuario == null) {
+  //     return response.json({ message: 'Este usuário não existe!' });
+  //   }
+  //   console.log(await bcrypt.compare(request.body.password, usuario.password));
 
-    if (await bcrypt.compare(request.body.password, usuario.password)) {
-      const { id } = usuario;
-      const token = jwt.sign({ id }, process.env.SECRET, {
-        expiresIn: 43200,
-      });
+  //   if (await bcrypt.compare(request.body.password, usuario.password)) {
+  //     const { id } = usuario;
+  //     const token = jwt.sign({ id }, process.env.SECRET, {
+  //       expiresIn: 43200,
+  //     });
 
-      delete usuario.password;
-      return response.json({ auth: true, token, usuario });
-    }
+  //     delete usuario.password;
+  //     return response.json({ auth: true, token, usuario });
+  //   }
 
-    return response.json({ message: 'Senha incorreta!' });
-  }
+  //   return response.json({ message: 'Senha incorreta!' });
+  // }
 
   async recoverPassword(
     request: Request,
@@ -221,6 +220,7 @@ class UsuarioController {
           temporaryPassword: true,
         },
       );
+      console.log(temporaryPassword);
 
       if (usuario == null) {
         return response
@@ -283,6 +283,8 @@ class UsuarioController {
           temporaryPassword: false,
         },
       );
+      console.log(password);
+
       return response.json(usuario);
     } catch {
       return response
@@ -290,34 +292,17 @@ class UsuarioController {
         .json({ error: 'Não foi possivel alterar a senha!' });
     }
   }
-  public async authenticate(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
-    const repository = APPDataSource.getRepository(Usuario);
+  async login(request: Request, response: Response): Promise<Response> {
+    const { email, password } = request.body;
 
-    const { email } = request.body;
+    const createSession = new CreateSessionsService();
 
-    const user = await repository.findOne({ where: { email } });
+    const usuario = await createSession.execute({
+      email,
+      password,
+    });
 
-    if (!user) {
-      return response
-        .status(401)
-        .json({ error: 'usuário não existe / email incorreto' });
-    }
-
-    if (await bcrypt.compare(request.body.password, user.password)) {
-      //const { id } = user;
-      const token = jwt.sign({ id: user.id }, process.env.SECRET, {
-        expiresIn: '1d',
-      });
-
-      const profile = { ...Usuario._doc };
-      delete profile.password;
-      return response.json({ auth: true, token, profile });
-    }
-    return response.status(401).json({ error: 'Senha incorreta.' });
+    return response.json(usuario);
   }
 }
 

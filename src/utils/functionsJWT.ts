@@ -1,4 +1,6 @@
 import jwt = require('jsonwebtoken');
+import bcrypt = require('bcrypt');
+import { Usuario } from '../models/Usuario';
 
 function verifyJWT(request, response, NextFunction) {
   const token = request.headers['x-access-token'];
@@ -21,4 +23,10 @@ function verifyJWT(request, response, NextFunction) {
   });
 }
 
+export const checkPassword = async (
+  user: Usuario,
+  password: string | Buffer,
+) => {
+  await bcrypt.compare(password, user.password);
+};
 export { verifyJWT };
