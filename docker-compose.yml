@@ -5,9 +5,7 @@ services:
     container_name: backend_usuarios
     build: .
     ports:
-      - 3001:3001
-    environment:
-      PORT: 3001
+      - 3010:3010
     env_file: .env
     volumes:
       - ./:/code
@@ -17,8 +15,8 @@ services:
     depends_on:
       - db_usuarios
 
-  db_servidores:
-    container_name: backend_usuarios
+  db_usuarios:
+    container_name: db_usuarios
     image: postgres:14.1-alpine
     restart: always
     environment:

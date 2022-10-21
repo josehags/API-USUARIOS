@@ -1,15 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import { Usuario } from '../models/Usuario';
 import { APPDataSource } from '../database/data-source';
-import * as yup from 'yup';
-import crypto = require('crypto');
-import bcrypt = require('bcrypt');
-import jwt = require('jsonwebtoken');
-import hash = require('../utils/hashPass');
-import mailer = require('../utils/mailer');
-import { CreateSessionsService } from './CreateSessions';
 
-class UsuarioController {
+import * as yup from 'yup';
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import * as hash from '../utils/hashPass';
+import * as mailer from '../utils/mailer';
+
+export class UsuarioController {
   async create(request: Request, response: Response, next: NextFunction) {
     const { name, email, role, sector, image } = request.body;
 
@@ -55,9 +55,9 @@ class UsuarioController {
     await usuariosRepository.save(usuario);
 
     transporter.sendMail({
-      from: process.env.email,
+      from: process.env.EMAIL,
       to: email,
-      subject: 'Senha temporária SiGeD',
+      subject: 'Senha temporária',
       text: `A sua senha temporária é: ${temporaryPassword}`,
     });
 
@@ -166,30 +166,29 @@ class UsuarioController {
     return response.json(usuariosRepository);
   }
 
-  // async login(request: Request, response: Response, next: NextFunction) {
-  //   const usuariosRepository = APPDataSource.getRepository(Usuario);
+  async login(request: Request, response: Response, next: NextFunction) {
+    const usuariosRepository = APPDataSource.getRepository(Usuario);
 
-  //   const usuario = await usuariosRepository.findOne({
-  //     where: { email: request.body.email },
-  //   });
+    const usuario = await usuariosRepository.findOne({
+      where: { id: request.body.id },
+    });
 
-  //   if (usuario == null) {
-  //     return response.json({ message: 'Este usuário não existe!' });
-  //   }
-  //   console.log(await bcrypt.compare(request.body.password, usuario.password));
+    if (usuario == null) {
+      return response.json({ message: 'Este usuário não existe!' });
+    }
+    console.log(await bcrypt.compare(request.body.password, usuario.password));
+    if (await bcrypt.compare(request.body.password, usuario.password)) {
+      const { id } = usuario;
+      const token = jwt.sign({ id }, process.env.SECRET, {
+        expiresIn: 43200,
+      });
 
-  //   if (await bcrypt.compare(request.body.password, usuario.password)) {
-  //     const { id } = usuario;
-  //     const token = jwt.sign({ id }, process.env.SECRET, {
-  //       expiresIn: 43200,
-  //     });
+      delete usuario.password;
+      return response.json({ auth: true, token, usuario });
+    }
 
-  //     delete usuario.password;
-  //     return response.json({ auth: true, token, usuario });
-  //   }
-
-  //   return response.json({ message: 'Senha incorreta!' });
-  // }
+    return response.json({ message: 'Senha incorreta!' });
+  }
 
   async recoverPassword(
     request: Request,
@@ -220,7 +219,6 @@ class UsuarioController {
           temporaryPassword: true,
         },
       );
-      console.log(temporaryPassword);
 
       if (usuario == null) {
         return response
@@ -229,9 +227,9 @@ class UsuarioController {
       }
 
       transporter.sendMail({
-        from: process.env.email,
+        from: process.env.EMAIL,
         to: email,
-        subject: 'Senha temporária SiGeD',
+        subject: 'Senha temporária',
         text: `A sua senha temporária é: ${temporaryPassword}`,
       });
 
@@ -283,8 +281,6 @@ class UsuarioController {
           temporaryPassword: false,
         },
       );
-      console.log(password);
-
       return response.json(usuario);
     } catch {
       return response
@@ -292,18 +288,13 @@ class UsuarioController {
         .json({ error: 'Não foi possivel alterar a senha!' });
     }
   }
-  async login(request: Request, response: Response): Promise<Response> {
-    const { email, password } = request.body;
 
-    const createSession = new CreateSessionsService();
-
-    const usuario = await createSession.execute({
-      email,
-      password,
+  async token(request: Request, response: Response, next: NextFunction) {
+    const id = 1;
+    const token = jwt.sign({ id }, process.env.SECRET, {
+      expiresIn: 43200,
     });
 
-    return response.json(usuario);
+    return response.json({ auth: true, token });
   }
 }
-
-export { UsuarioController };

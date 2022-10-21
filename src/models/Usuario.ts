@@ -6,6 +6,8 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import bcrypt = require('bcrypt');
+
 import { v4 as uuid } from 'uuid'; // Importando o uuid v4 e renomeando pra uuid
 
 @Entity('usuarios') // Do TypeORM, pois será uma entidade do banco de dados, utilizada no controller
@@ -55,5 +57,9 @@ export class Usuario {
     if (!this.id) {
       this.id = uuid();
     }
+  }
+
+  passwordIsValid(password: string | Buffer) {
+    return bcrypt.compare(password, this.password);
   }
 }
