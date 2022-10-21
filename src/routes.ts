@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { UsuarioController } from '../controllers/UsuarioController';
-import { verifyJWT } from '../utils/functionsJWT';
+import { UsuarioController } from './controllers/UsuarioController';
+import { verifyJWT } from './Utils/functionsJWT';
 
 const router = Router();
 const usuarioController = new UsuarioController();

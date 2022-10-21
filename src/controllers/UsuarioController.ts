@@ -6,8 +6,8 @@ import * as yup from 'yup';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import * as hash from '../utils/hashPass';
-import * as mailer from '../utils/mailer';
+import * as hash from '../Utils/hashPass';
+import * as mailer from '../Utils/mailer';
 
 export class UsuarioController {
   async create(request: Request, response: Response, next: NextFunction) {

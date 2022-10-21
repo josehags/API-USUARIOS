@@ -2,8 +2,8 @@ import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { pagination } from 'typeorm-pagination';
-import { router } from './routes/routes';
 import AppError from './errors/appErros';
+import { router } from './routes';
 
 const app = express();
 

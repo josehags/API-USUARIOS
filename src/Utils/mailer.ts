@@ -1,5 +1,4 @@
 import * as nodemailer from 'nodemailer';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 
 export const transporter = nodemailer.createTransport({
