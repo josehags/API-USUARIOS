@@ -108,18 +108,28 @@ export class UsuarioController {
 
     const usuariosRepository = APPDataSource.getRepository(Usuario);
 
-    const usuario = await usuariosRepository.update(
-      { id },
-      {
-        name,
-        email,
-        role,
-        sector,
-        image,
-      },
-    );
+    try {
+      await usuariosRepository.update(
+        { id },
+        {
+          name,
+          email,
+          role,
+          sector,
+          image,
+        },
+      );
 
-    return response.status(201).json(usuario);
+      const usuarioUpdated = await usuariosRepository.findOne({
+        where: { id: id },
+      });
+
+      return response.json(usuarioUpdated);
+    } catch {
+      return response
+        .status(400)
+        .json({ error: 'Não foi possivel alterar o cadastro!' });
+    }
   }
 
   async remove(request: Request, response: Response, next: NextFunction) {
@@ -170,21 +180,22 @@ export class UsuarioController {
     const usuariosRepository = APPDataSource.getRepository(Usuario);
 
     const usuario = await usuariosRepository.findOne({
-      where: { id: request.body.id },
+      where: { email: request.body.email },
     });
 
     if (usuario == null) {
       return response.json({ message: 'Este usuário não existe!' });
     }
-    console.log(await bcrypt.compare(request.body.password, usuario.password));
+
     if (await bcrypt.compare(request.body.password, usuario.password)) {
       const { id } = usuario;
       const token = jwt.sign({ id }, process.env.SECRET, {
         expiresIn: 43200,
       });
 
-      delete usuario.password;
-      return response.json({ auth: true, token, usuario });
+      const profile = { ...usuario };
+      delete profile.password;
+      return response.json({ auth: true, token, profile });
     }
 
     return response.json({ message: 'Senha incorreta!' });
@@ -202,15 +213,15 @@ export class UsuarioController {
 
     const temporaryPassword = crypto.randomBytes(8).toString('hex');
 
-    const existeusuario = await usuariosRepository.findOne({
+    const usuarioAlreadyExists = await usuariosRepository.findOne({
       where: { email: request.body.email },
     });
 
-    if (!existeusuario) {
+    if (!usuarioAlreadyExists) {
       return response.json({ message: 'Não existe usuário com este email!' });
     }
 
-    const { id } = existeusuario;
+    const { id } = usuarioAlreadyExists;
     try {
       const usuario = await usuariosRepository.update(
         { id },
@@ -265,23 +276,25 @@ export class UsuarioController {
         .json({ status: 'Erro de validação da senha!' });
     }
 
-    const existeusuario = await usuariosRepository.findOne({
-      where: { id: request.body.id },
+    const usuarioAlreadyExists = await usuariosRepository.findOne({
+      where: { id: id },
     });
 
-    if (!existeusuario) {
+    if (!usuarioAlreadyExists) {
       return response.json({ message: 'Este usuário não existe!' });
     }
 
     try {
-      const usuario = await usuariosRepository.update(
+      await usuariosRepository.update(
         { id },
         {
           password: await hash.hashPass(password),
           temporaryPassword: false,
         },
       );
-      return response.json(usuario);
+      delete usuarioAlreadyExists.password;
+      usuarioAlreadyExists.temporaryPassword = false;
+      return response.json(usuarioAlreadyExists);
     } catch {
       return response
         .status(400)

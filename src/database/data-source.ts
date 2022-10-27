@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { Usuario } from '../models/Usuario';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 
 //import { CreateUsuarios1656685284937 } from '../database/migrations/1656685284937-CreateUsuarios';

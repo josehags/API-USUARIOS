@@ -6,8 +6,6 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import bcrypt = require('bcrypt');
-
 import { v4 as uuid } from 'uuid'; // Importando o uuid v4 e renomeando pra uuid
 
 @Entity('usuarios') // Do TypeORM, pois será uma entidade do banco de dados, utilizada no controller
@@ -44,8 +42,6 @@ export class Usuario {
 
   @UpdateDateColumn() // Para já capturar a data e fazer a formatação
   update_at: Date;
-  private _doc: any;
-  static _doc: any;
 
   /*
       A geração do uuID automático não será por meio do SGBD, e sim aqui pelo código
@@ -57,9 +53,5 @@ export class Usuario {
     if (!this.id) {
       this.id = uuid();
     }
-  }
-
-  passwordIsValid(password: string | Buffer) {
-    return bcrypt.compare(password, this.password);
   }
 }

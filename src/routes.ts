@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { UsuarioController } from './controllers/UsuarioController';
+
 import { verifyJWT } from './Utils/functionsJWT';
 
 const router = Router();
