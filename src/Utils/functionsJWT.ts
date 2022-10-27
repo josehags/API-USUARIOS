@@ -19,12 +19,10 @@ export function verifyJWT(
     process.env.SECRET,
     (err: any, decoded: { id: any }) => {
       if (err) {
-        return response
-          .status(500)
-          .json({
-            auth: false,
-            message: 'Não foi possível autenticar o token!',
-          });
+        return response.status(500).json({
+          auth: false,
+          message: 'Não foi possível autenticar o token!',
+        });
       }
       request.params.userId = decoded.id;
       next();

@@ -3,11 +3,12 @@ import { Usuario } from '../models/Usuario';
 import { APPDataSource } from '../database/data-source';
 
 import * as yup from 'yup';
-import crypto from 'crypto';
+// import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as hash from '../Utils/hashPass';
 import * as mailer from '../Utils/mailer';
+import { generateStrongPassword } from '../Utils/generateStrongPassword';
 
 export class UsuarioController {
   async create(request: Request, response: Response, next: NextFunction) {
@@ -15,7 +16,8 @@ export class UsuarioController {
 
     const { transporter } = mailer;
 
-    const temporaryPassword = crypto.randomBytes(8).toString('hex');
+    //    const temporaryPassword = crypto.randomBytes(8).toString('hex');
+    const temporaryPassword = generateStrongPassword(8);
 
     const schema = yup.object().shape({
       name: yup.string().required(),
@@ -60,7 +62,7 @@ export class UsuarioController {
       subject: 'Senha temporária',
       text: `A sua senha temporária é: ${temporaryPassword}`,
     });
-
+    console.log();
     return response.status(201).json(usuario);
   }
 
@@ -211,7 +213,8 @@ export class UsuarioController {
 
     const usuariosRepository = APPDataSource.getRepository(Usuario);
 
-    const temporaryPassword = crypto.randomBytes(8).toString('hex');
+    //    const temporaryPassword = crypto.randomBytes(8).toString('hex');
+    const temporaryPassword = generateStrongPassword(8);
 
     const usuarioAlreadyExists = await usuariosRepository.findOne({
       where: { email: request.body.email },
@@ -243,7 +246,7 @@ export class UsuarioController {
         subject: 'Senha temporária',
         text: `A sua senha temporária é: ${temporaryPassword}`,
       });
-
+      console.log(temporaryPassword);
       return response.json({ message: 'Email enviado!' });
     } catch {
       return response
