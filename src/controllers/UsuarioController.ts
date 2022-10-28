@@ -17,7 +17,7 @@ export class UsuarioController {
     const { transporter } = mailer;
 
     //    const temporaryPassword = crypto.randomBytes(8).toString('hex');
-    const temporaryPassword = generateStrongPassword(8);
+    const temporaryPassword = generateStrongPassword(15);
 
     const schema = yup.object().shape({
       name: yup.string().required(),
@@ -214,7 +214,7 @@ export class UsuarioController {
     const usuariosRepository = APPDataSource.getRepository(Usuario);
 
     //    const temporaryPassword = crypto.randomBytes(8).toString('hex');
-    const temporaryPassword = generateStrongPassword(8);
+    const temporaryPassword = generateStrongPassword(15);
 
     const usuarioAlreadyExists = await usuariosRepository.findOne({
       where: { email: request.body.email },
